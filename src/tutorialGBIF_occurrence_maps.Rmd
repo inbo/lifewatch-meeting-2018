@@ -1,0 +1,175 @@
+---
+title: "RGBIF : a R approach to GBIF occurrence data"
+author:
+- Damiano Oldoni
+- Stijn Van Hoey
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_depth: 3
+    toc_float: true
+    number_sections: true
+    theme: yeti
+    df_print: paged
+knit: (function(input_file, encoding) { rmarkdown::render(input_file, encoding = encoding, output_file = paste0("../docs/",sub(".Rmd", ".html", basename(input_file))))})
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+This is a tutorial to show the potential of using GBIF open data within R environment.
+
+### Load libraries:
+```{r}
+# Tidyverse packages
+library(dplyr)
+library(magrittr)
+library(purrr)
+library(tidyr)
+
+# Graphic packages
+library(sp)
+library(ggplot2)
+library(ggmap)
+library(rgdal)
+library(raster)
+library(rgeos)
+library(leaflet)
+
+# Other packages
+library(rgbif)
+```
+
+### Download GBIF occurrences for some species
+In this tutorial we use the following species and search in the following country and within the temporal window:
+```{r}
+species <- c("Vanessa atalanta Linnaeus, 1758", "Phylloscopus collybita (Vieillot, 1817)")
+taxonKeys <- map(species, function(x) name_backbone(x)$speciesKey)
+countries <- list(country = c("BE"))
+year_range <- list(year = c(2007, 2018))
+```
+
+### Get occurrences from GBIF
+Get occurrence data from GBIF via function `occ_data` from `RGBIF` package:
+```{r}
+occurrences <- map(taxonKeys, 
+                   function(x) rgbif::occ_data(
+                     taxonKey = x, 
+                     country =  paste(unlist(countries), 
+                                      collapse = ";"), 
+                     year = paste(unlist(year_range), collapse = ","),
+                     limit = 200000)$data)
+occurrences <- set_names(occurrences, nm = species)
+```
+
+###Overview 
+A first overview of species distribution:
+```{r}
+longitude_max <- max(unlist(map(occurrences, 
+                                function(spec) 
+                                  max(spec$decimalLongitude, na.rm = TRUE))))
+longitude_min <- min(unlist(map(occurrences, 
+                                function(spec) 
+                                  min(spec$decimalLongitude, na.rm = TRUE))))
+
+latitude_max <- max(unlist(map(occurrences, 
+                                function(spec) 
+                                  max(spec$decimalLatitude, na.rm = TRUE))))
+latitude_min <- min(unlist(map(occurrences, 
+                                function(spec) 
+                                  min(spec$decimalLatitude, na.rm = TRUE))))
+purrr::map(names(occurrences), function(spec) 
+  qmplot(x = decimalLongitude,
+         y = decimalLatitude, 
+         data = occurrences[[spec]][1:1000,], 
+         maptype = "toner-lite", 
+         xlim = c(longitude_min, longitude_max), 
+         ylim = c(latitude_min,latitude_max),
+         main = spec,
+         color = I("blue")))
+```
+
+### Monthly occurrence distribution
+For some species can be interesting to see the monthly occurrence distribution:
+```{r}
+months <- c(1:12)
+occurrences_per_month <- map(months, function(m) map(occurrences, function(x) x %>% filter(month == m)))
+counts_per_months <- map(species, 
+                         function(i) unlist(
+                           map(occurrences_per_month, 
+                               function(x) 
+                                 nrow(x[[i]]))))
+counts_per_months <- set_names(counts_per_months, nm = species)
+counts_per_months_df <- tidyr::gather(data.frame(counts_per_months), species)
+counts_per_months_df$month <- rep.int(1:12, length(species))
+ ggplot(counts_per_months_df, aes(fill = species, y = value, x = month)) +
+   geom_bar(position="dodge", stat="identity") +
+   scale_x_continuous(breaks=seq(1,12,1), 
+                     labels=c("Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                              "Jul", "Aug", "Sept", "Oct", "Nov",
+                              "Dec"))
+```
+
+### Occurrence geographical distribution based on UTM-10 squares
+Import Belgium UTM-10 square polygon data:
+```{r}
+eu_10grid <-  readOGR("../data/input/EUgrid10.geojson")
+wgs_84 <- CRS("+init=epsg:4326") # CRS used by GBIF
+eu_10grid <- spTransform(eu_10grid, wgs_84)
+```
+
+Transform occurrence positions to spatial points:
+```{r}
+coord_occ <- purrr::map(occurrences, 
+                 function(spec) data.frame(cbind(spec$decimalLongitude,
+                                                 spec$decimalLatitude)))
+coord_occ <- purrr::map(coord_occ, function(spec) set_names(spec, c("lon", "lat")))
+occ_points <- map2(coord_occ, occurrences, 
+                   function(x, y) SpatialPointsDataFrame(
+                     coords = x, 
+                     data = y, 
+                     proj4string = wgs_84))
+```
+
+The function `over` is very useful for spatial JOINs. In our case it can be used to get the occurrence points contained in the square:
+```{r}
+pts_square <- purrr::map(occ_points, function(spec) over(eu_10grid, spec, fn = NULL, returnList = TRUE))
+number_of_pts_square <- purrr::map(pts_square, function(spec) purrr::map(spec, function(poly) nrow(poly)))
+number_of_pts_square_dfs <- purrr::map(number_of_pts_square, function(spec) data.frame(value = unlist(spec), id = names(spec)))
+```
+
+### Plotting Belgium map with occurrences:
+Importing Belgium map:
+```{r}
+extent <- c(left = 2.54, bottom = 49.46, right = 6.4, top = 51.51)
+map <- get_stamenmap(extent, zoom = 8, maptype = "toner-background")
+belgium <- ggmap(map)
+```
+
+When working with DataFrame data, the application of `ggplot2` is typical. As `ggplot2` only works on `data.frame` objects, a translation need to be made between the `Spatial***DataFrame` and a default `data.frame`. This translation is provided by `fortify`:
+```{r}
+eu_10grid_df <- fortify(eu_10grid)
+```
+Joining the number of occurrence points contained in every square and the Belgium UTM-10 square polygon data
+```{r}
+datapoly <- purrr::map(number_of_pts_square_dfs, 
+                function(spec) left_join(eu_10grid_df, spec, by = c("id")))
+```
+
+Renaming longitude column `long` in `datapoly` to `lon` as in the Belgian map:
+```{r}
+datapoly <- purrr::map(datapoly, 
+                       function(spec) rename(spec, lon = long))
+```
+
+Plotting the maps. Notice the use of `geom_polygon` in order to use a fill color for the polygons:
+```{r}
+plots_geo_occ <- purrr::map(names(datapoly), function(spec) 
+  belgium + 
+    geom_polygon(aes(fill = value, group = id), data = datapoly[[spec]]) +
+    ggtitle(spec)
+    )
+plots_geo_occ
+```
