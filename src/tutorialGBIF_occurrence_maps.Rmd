@@ -168,7 +168,7 @@ Plotting the maps. Notice the use of `geom_polygon` in order to use a fill color
 ```{r}
 plots_geo_occ <- purrr::map(names(datapoly), function(spec) 
   belgium + 
-    geom_polygon(aes(fill = value, group = id), data = datapoly[[spec]]) +
+    geom_polygon(aes(fill = value, group = id), data = datapoly[[spec]], alpha = 0.9) +
     ggtitle(spec)
     )
 plots_geo_occ
