@@ -71,11 +71,12 @@ def main():
                 # Assigning a variable so we can create a photo JPG file that
                 # contains the date and time as its name
                 photo = get_date + '_' +  get_time + '.jpg'
+                photo_location =  os.path.join(saveLocation, photo)
 
                 # Using the raspistill library to take a photo. You can show
                 # that a photo has been taken in a small preview box on the desktop by
                 # changing --nopreview to --preview
-                cmd = 'raspistill -t 300 -w 1920 -h 1440 --preview --output \'' + photo + '\''
+                cmd = 'raspistill -t 300 -w 1920 -h 1440 --nopreview --output ' + photo_location
                 print 'cmd ' + cmd
 
                 # If you find you have permission problems saving to other attached storage devices you can use this line to change the owner of the photo if required
@@ -88,11 +89,7 @@ def main():
                 # call ([perms], shell=True)
 
                 # Log that a photo was taken successfully and state the file name so we know which one"
-                logging.info('Photo taken successfully %(show_photo_name)s', { 'show_photo_name': photo })
-                photo_location =  os.path.join(saveLocation, photo)
-
-                # Log that we are about to attempt to write the overlay text. This was removed in v1.07 to speed up the capture process."
-                logging.info('Photo saved as %(photolocation)s', {'photolocation' : photo_location})
+                logging.info('Photo taken successfully %(show_photo_name)s', { 'show_photo_name': photo_locationphoto })
 
             else:
 
