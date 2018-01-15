@@ -89,7 +89,7 @@ def main():
                 # call ([perms], shell=True)
 
                 # Log that a photo was taken successfully and state the file name so we know which one"
-                logging.info('Photo taken successfully %(show_photo_name)s', { 'show_photo_name': photo_locationphoto })
+                logging.info('Photo taken successfully %(show_photo_name)s', { 'show_photo_name': photo_location })
 
             else:
 
