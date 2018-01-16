@@ -80,7 +80,8 @@ def main():
                 with picamera.PiCamera() as camera:
                     camera.resolution = (1024, 768) # (1920, 1440)
                     camera.framerate = framerate
-                    camera.capture_sequence([photo_location % i for i in range(frames)], use_video_port=True)
+                    camera.capture_sequence([photo_location % i for i in range(frames)],
+                                            use_video_port=False)  #burst=True
 
                 # Log that sequence was taken successfully and state the file name so we know which one
                 logging.info('Photo sequence taken successfully %(show_photo_name)s', { 'show_photo_name': photo_location })
