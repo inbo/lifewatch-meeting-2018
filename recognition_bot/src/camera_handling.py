@@ -65,7 +65,7 @@ def main():
 
                 i = datetime.now() # Get the time now
                 get_date = i.strftime('%Y-%m-%d') # Get and format the date
-                get_time = i.strftime('%H-%M-%S.%f') # Get and format the time
+                get_time = i.strftime('%H:%M:%S') # Get and format the time
 
                 # Recording that a PIR trigger was detected and
                 # logging the battery level at this time
