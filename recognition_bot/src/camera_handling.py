@@ -15,6 +15,7 @@ from datetime import datetime
 import logging
 import sys
 import os
+import picamera
 
 # Logging the activity to a log file.
 
@@ -25,6 +26,8 @@ logging.info('Lifewatch demo setup started up successfully')
 
 # Assigning a variable to the pins that we have connected the PIR to
 sensorPin = 13
+frames = 6
+framerate = 3 #fps
 
 # Setting the GPIO (General Purpose Input Output) pins up
 # so we can detect if they are HIGH or LOW (on or off)
@@ -70,26 +73,17 @@ def main():
 
                 # Assigning a variable so we can create a photo JPG file that
                 # contains the date and time as its name
-                photo = get_date + '_' +  get_time + '.jpg'
+                photo = get_date + '_' +  get_time + '_%01d.jpg'
                 photo_location =  os.path.join(saveLocation, photo)
+                
+                logging.info('About to take photo sequence and save to the drive')
+                with picamera.PiCamera() as camera:
+                    camera.resolution = (1024, 768) # (1920, 1440)
+                    camera.framerate = framerate
+                    camera.capture_sequence([photo_location % i for i in range(frames)], use_video_port=True)
 
-                # Using the raspistill library to take a photo. You can show
-                # that a photo has been taken in a small preview box on the desktop by
-                # changing --nopreview to --preview
-                cmd = 'raspistill -t 300 -w 1920 -h 1440 --nopreview --output ' + photo_location
-                print 'cmd ' + cmd
-
-                # If you find you have permission problems saving to other attached storage devices you can use this line to change the owner of the photo if required
-                # perms = 'chown pi:pi /media/usb0/' + photo
-                # print 'perms ' +perms
-
-                # Log that we have just taking a photo"
-                logging.info('About to take a photo and save to the drive')
-                call ([cmd], shell=True)
-                # call ([perms], shell=True)
-
-                # Log that a photo was taken successfully and state the file name so we know which one"
-                logging.info('Photo taken successfully %(show_photo_name)s', { 'show_photo_name': photo_location })
+                # Log that sequence was taken successfully and state the file name so we know which one
+                logging.info('Photo sequence taken successfully %(show_photo_name)s', { 'show_photo_name': photo_location })
 
             else:
 
