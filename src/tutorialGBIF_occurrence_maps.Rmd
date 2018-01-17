@@ -19,10 +19,11 @@ knit: (function(input_file, encoding) { rmarkdown::render(input_file, encoding =
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-This is a tutorial to show the potential of using GBIF open data within R environment.
+This tutorial shows how to start using GBIF occurrence data in few `R` easy statements thanks to `RGBIF` package.
 
-### Load libraries:
-```{r}
+### Load libraries
+First we need to load the needed packages.
+```{r loading_packages,  message=FALSE, warning=FALSE}
 # Tidyverse packages
 library(dplyr)
 library(magrittr)
@@ -30,146 +31,404 @@ library(purrr)
 library(tidyr)
 
 # Graphic packages
-library(sp)
 library(ggplot2)
+library(sp)
 library(ggmap)
 library(rgdal)
-library(raster)
+# library(raster)
 library(rgeos)
 library(leaflet)
+library(scales)
 
 # Other packages
 library(rgbif)
 ```
 
-### Download GBIF occurrences for some species
-In this tutorial we use the following species and search in the following country and within the temporal window:
+## Download GBIF occurrences
+Downloading occurrence data on the fly is possible thanks to the function `occ_data` (a simplified version of `occ_search` for speed improvement). 
+You can search species occurrences by scientific name (`scientificName` or `taxonKey` from the GBIF backbone) and several parameters are provided so that it is possible to restrict the search on specific geographical areas (e.g. countries, `country`, continents, `continent`, latitude/longitude ranges, `decimalLatitude` `decimalLongitude`), temporal windows (year, `year`, month, `month`) or datasets, `datasetKey`. Check ![RGBIF documentation](https://cran.r-project.org/web/packages/rgbif/rgbif.pdf "RGBIF") for the full list of options.
+
+As explained in tutorial ??? (set the name here!), one of the important elements provided by GBIF is the GBIF backbone. Thanks to it, searching occurrences via `scientificName` or `taxonKey` would automatically include occurrences data of all included and synonym taxa.
+
+In this tutorial we search occurrences of a butterfly: Vanessa atalanta Linnaeus, 1758, best known as red admiral. We restrict our search on data retrieved during the last five years in Belgium:
 ```{r}
-species <- c("Vanessa atalanta Linnaeus, 1758", "Phylloscopus collybita (Vieillot, 1817)")
-taxonKeys <- map(species, function(x) name_backbone(x)$speciesKey)
-countries <- list(country = c("BE"))
-year_range <- list(year = c(2007, 2018))
+species <- c("Vanessa atalanta Linnaeus, 1758")
+# taxonKeys <- map(species, function(x) name_backbone(x)$speciesKey)
+countries <- c("BE")
+date_today <- as.Date(Sys.Date())
+year_today <- as.numeric(format(date_today, "%Y"))
+year_range <- c(year_today - 4, year_today)
+year_range
 ```
 
-### Get occurrences from GBIF
-Get occurrence data from GBIF via function `occ_data` from `RGBIF` package:
+A call to `occ_data` returns by default 500 records if no value is assigned to the parameter `limit`. There is a hard maximum of 200000 records, which we suggests to use. The arguments can be passed to `occ_data` in the following way:
 ```{r}
-occurrences <- map(taxonKeys, 
-                   function(x) rgbif::occ_data(
-                     taxonKey = x, 
-                     country =  paste(unlist(countries), 
+occurrences <- rgbif::occ_data(
+                     scientificName = species, 
+                     country =  paste(countries, 
                                       collapse = ";"), 
-                     year = paste(unlist(year_range), collapse = ","),
-                     limit = 200000)$data)
-occurrences <- set_names(occurrences, nm = species)
+                     year = paste(year_range, collapse = ","),
+                     limit = 200000)
+head(occurrences)
 ```
-
-###Overview 
-A first overview of species distribution:
+Spend a second to notice the structure of the return variable, `occurrences`: it is a list of two which contains the fields `$meta` and `$data`, respectively the metadata and the data. 
 ```{r}
-longitude_max <- max(unlist(map(occurrences, 
-                                function(spec) 
-                                  max(spec$decimalLongitude, na.rm = TRUE))))
-longitude_min <- min(unlist(map(occurrences, 
-                                function(spec) 
-                                  min(spec$decimalLongitude, na.rm = TRUE))))
-
-latitude_max <- max(unlist(map(occurrences, 
-                                function(spec) 
-                                  max(spec$decimalLatitude, na.rm = TRUE))))
-latitude_min <- min(unlist(map(occurrences, 
-                                function(spec) 
-                                  min(spec$decimalLatitude, na.rm = TRUE))))
-purrr::map(names(occurrences), function(spec) 
-  qmplot(x = decimalLongitude,
-         y = decimalLatitude, 
-         data = occurrences[[spec]][1:1000,], 
-         maptype = "toner-lite", 
-         xlim = c(longitude_min, longitude_max), 
-         ylim = c(latitude_min,latitude_max),
-         main = spec,
-         color = I("blue")))
+occurrences$meta
 ```
+The metadata is a list of 4: the most important fields are `$count`, the number of returned records, and `endOfRecords`, a logical (`TRUE` or `FALSE`), important to know whether `occ_data` returned all records or not. In our case  `endOfRecords = TRUE`, that means that we got all occurrence data about Vanessa Atalanta in the specified time window and country. In case you setup `limit = 200000` (the hard maximum of `occ_data`) as argument in `occ_data` and you get `count = 200000`, `endOfRecords = FALSE`, it means `occ_data` cannot return all asked data. You need to use another function, `occ_download`, which is explained in section [RGBIF Advanced][].
 
-### Monthly occurrence distribution
-For some species can be interesting to see the monthly occurrence distribution:
+The field `$data` is a tibble dataframe containing all returned occurrence data:
 ```{r}
-months <- c(1:12)
-occurrences_per_month <- map(months, function(m) map(occurrences, function(x) x %>% filter(month == m)))
-counts_per_months <- map(species, 
-                         function(i) unlist(
-                           map(occurrences_per_month, 
-                               function(x) 
-                                 nrow(x[[i]]))))
-counts_per_months <- set_names(counts_per_months, nm = species)
-counts_per_months_df <- tidyr::gather(data.frame(counts_per_months), species)
-counts_per_months_df$month <- rep.int(1:12, length(species))
- ggplot(counts_per_months_df, aes(fill = species, y = value, x = month)) +
-   geom_bar(position="dodge", stat="identity") +
-   scale_x_continuous(breaks=seq(1,12,1), 
-                     labels=c("Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                              "Jul", "Aug", "Sept", "Oct", "Nov",
-                              "Dec"))
+occurrences$data
+```
+As expected the number of rows is equal to `occurrence$meta$count`:
+```{r}
+nrow(occurrences$data)
+occurrences$meta$count
+```
+The dataframe contains a lot of columns related, among others, to taxonomic classification (`kingdom`, `phylum`, `class`, `order`, `family`, `genus`, `taxonRank`, `scientificName` and relative keys), dataset and record information (`datasetName`, `datasetKey`, `catalogNumber`, `recordedBy`, `institutionCode`, `references`, ...), geographical and temporal attributes (`country`, `countryCode`, `decimalLatitude`, `decimalLongitude`, `year`, `month`, `day`, ...)
+To maximally simplify our code and mantain our environment workspace as small as possible, we can rename `occurrences$data`:
+```{r}
+occurrences <- occurrences$data
 ```
 
-### Occurrence geographical distribution based on UTM-10 squares
-Import Belgium UTM-10 square polygon data:
+## Geographical and temporal distribution of occurrence data
+Investigating the geographical distribution of occurrence data is possible by  columns `decimalLatitude`, `decimalLongitude`, while temporal distribution can be obatined by means of columns `year`, `month` and `day`. This tutorial cannot cover all aspects of handling geospatial data. For more info about it, please read this ![tutorial](course_gis_scripting/notebooks/07-gis-r-vectors.Rmd).
+
+### Geographical distribution
+A first overview of the geographical distribution of occurrence data is provided by the RGBIF function `gbifmap`, based on `ggplot2` package, which creates a map to visualize GBIF occurrence data. You can select the map database, `database`, among the following values: `county`, `state`, `usa`, `world`, `world2`, `france`, `italy`, or `nz`. The choice of `database` parameter would determine what you can choose in the `region` parameter. For example, run the code below to see all possible regions coupled to the `world` database layer.:
+```{r}
+sort(unique(ggplot2::map_data("world")$region))
+```
+
+A map with thousands of points is surely as less informative as unappealing. For this reason we plot just few hunderds of records.
+```{r}
+rgbif::gbifmap(input = occurrences[1:500,], mapdatabase = "world", region = "Belgium")
+```
+
+Still, the map is very basic. If you would like to have a better map of Belgium, you can choose to work with `ggmap` package:
+```{r}
+qmplot(x = decimalLongitude,
+       y = decimalLatitude, 
+       data = occurrences[1:300,], 
+       maptype = "toner-lite",
+       color = I("blue"))
+```
+
+#### Occurrence geographical distribution based on UTM-10 squares
+As probably you noticed, visualizing points on a map is not as such informative as hoped. A better way to viasualize the geographical occurrence distribution would be using tiles covering all Belgium and colored based on number of counts.
+We will use in this tutorial a *UTM grid*, where UTM stands for *Universal Transverse Mercator* projection. For more information, check this comprehensive ![article](http://geokov.com/education/utm.aspx "UTM projection"). Our grid covers all Belgium by means of squares with a side length of 10 km:
 ```{r}
 eu_10grid <-  readOGR("../data/input/EUgrid10.geojson")
+```
+
+Transform `occurrence` dataframe to a `SpatialPointsDtaFrame`, a data structure with combines coordinates, `@coords` and data, `@data`. 
+```{r}
 wgs_84 <- CRS("+init=epsg:4326") # CRS used by GBIF
-eu_10grid <- spTransform(eu_10grid, wgs_84)
+occ_points <- SpatialPointsDataFrame(coords = 
+                                       occurrences %>% select(
+                                         decimalLongitude, decimalLatitude),
+                     data = occurrences, 
+                     proj4string = wgs_84)
 ```
-
-Transform occurrence positions to spatial points:
+The coordinates are the columns `decimalLongitude` and `decimalLatitude` of `occurrences` dataframe, while `data` is `occurrences` itself.
+All GBIF occurrence data are saved using WGS84(EPSG: 4326), a *Coordinate Reference System* (CRS) for latitude-longitude coordinates very popular on the web, commonly used by organizations working with geographical data from the entire globe or many countries (WGS84 is the CRS used by Google Earth (!), just to cite the likely most famous user). For more information on CRSs in R, a nice overview is available ![here](https://www.nceas.ucsb.edu/~frazier/RSpatialGuides/OverviewCoordinateReferenceSystems.pdf "Overview Coordinate Reference Systems").  Before proceding further, we need to know the CRS for `eu_10grid`:
 ```{r}
-coord_occ <- purrr::map(occurrences, 
-                 function(spec) data.frame(cbind(spec$decimalLongitude,
-                                                 spec$decimalLatitude)))
-coord_occ <- purrr::map(coord_occ, function(spec) set_names(spec, c("lon", "lat")))
-occ_points <- map2(coord_occ, occurrences, 
-                   function(x, y) SpatialPointsDataFrame(
-                     coords = x, 
-                     data = y, 
-                     proj4string = wgs_84))
+proj4string(eu_10grid)
 ```
-
-The function `over` is very useful for spatial JOINs. In our case it can be used to get the occurrence points contained in the square:
+The last part of the returned statement, `towgs84=0,0,0` reveals that no coordinate system transformation is needed. However, if we compare it with CRS of `occ_points`, we can notice that `init` is missing:
 ```{r}
-pts_square <- purrr::map(occ_points, function(spec) over(eu_10grid, spec, fn = NULL, returnList = TRUE))
-number_of_pts_square <- purrr::map(pts_square, function(spec) purrr::map(spec, function(poly) nrow(poly)))
-number_of_pts_square_dfs <- purrr::map(number_of_pts_square, function(spec) data.frame(value = unlist(spec), id = names(spec)))
+proj4string(occ_points)
 ```
+To set it correctly, the same function `proj4string` can be used:
+```{r}
+proj4string(eu_10grid) <- wgs_84
+```
+So, we can actually say that `Spatial***DataFrame` classes (abbreviaton for `SpatialPointsDataFrame`, `SpatialPolygonsDataFrame`, ...) bring together the attribute data (`data.frame`), the coordinates (`geometry`) and the coordinate reference system (`crs`).
 
-### Plotting Belgium map with occurrences:
-Importing Belgium map:
+At this point, we are ready to count the number of occurrence records contained in each square. 
+First, we need to overlay the occurrence points, `occ_points`, and the grid, `eu_10grid`. The function `over` from `sp` package is very useful for spatial map overlays:
+```{r}
+pts_square <- over(eu_10grid, occ_points, returnList = TRUE)
+head(pts_square)
+```
+It returns a list as long as the number of squares in the grid. Each element of the list is a dataframe containing the occurrence data with coordinates within the given square.
+```{r}
+n_of_pts_square <- purrr:::map(pts_square, ~ nrow(.))
+n_of_pts_square <- data.frame(id = names(n_of_pts_square), 
+                              value = unlist(n_of_pts_square))
+head(n_of_pts_square)
+``` 
+
+#### Plot occurrence data distribution
+
+First, we import the Belgian map via `get_stamenmap` from `ggmap` package:
 ```{r}
 extent <- c(left = 2.54, bottom = 49.46, right = 6.4, top = 51.51)
-map <- get_stamenmap(extent, zoom = 8, maptype = "toner-background")
-belgium <- ggmap(map)
+belgium_map <- get_stamenmap(extent, zoom = 8, maptype = "toner-background")
+belgium <- ggmap(belgium_map)
+belgium
 ```
 
-When working with DataFrame data, the application of `ggplot2` is typical. As `ggplot2` only works on `data.frame` objects, a translation need to be made between the `Spatial***DataFrame` and a default `data.frame`. This translation is provided by `fortify`:
+As `ggplot2` only works on `data.frame` objects, a translation is always needed converting `Spatial***DataFrame` (in our case a `SpatialPolygonsDataFrame`) in a `data.frame`. This translation is provided by `fortify`:
 ```{r}
 eu_10grid_df <- fortify(eu_10grid)
+eu_10grid_df
 ```
-Joining the number of occurrence points contained in every square and the Belgium UTM-10 square polygon data
+We join the number of occurrence points contained in every square and the Belgium UTM-10 square grid by column `id`, the polygon identifier: 
 ```{r}
-datapoly <- purrr::map(number_of_pts_square_dfs, 
-                function(spec) left_join(eu_10grid_df, spec, by = c("id")))
+datapoly <- left_join(eu_10grid_df, number_of_pts_square_dfs, by = c("id"))
+datapoly
 ```
 
 Renaming longitude column `long` in `datapoly` to `lon` as in the Belgian map:
 ```{r}
-datapoly <- purrr::map(datapoly, 
-                       function(spec) rename(spec, lon = long))
+datapoly <- rename(datapoly, lon = long)
 ```
 
 Plotting the maps. Notice the use of `geom_polygon` in order to use a fill color for the polygons:
 ```{r}
-plots_geo_occ <- purrr::map(names(datapoly), function(spec) 
-  belgium + 
-    geom_polygon(aes(fill = value, group = id), data = datapoly[[spec]], alpha = 0.9) +
-    ggtitle(spec)
-    )
+plots_geo_occ <- belgium + 
+    geom_polygon(aes(fill = value, group = id), data = datapoly, alpha = 0.9) +
+    ggtitle(species)
 plots_geo_occ
 ```
+
+#### Interactive data visualization
+Interactive Visualization can be obtained by using `leaflet` package, one of the most popular open-source JavaScript libraries for interactive maps.
+Compared with `ggplot2` package, `leaflet` has the advantage to work with `Spatial***DataFrame`. 
+So, it is sufficient to add the number of occurrence in each square to `eu_10grid@data`:
+```{r}
+eu_10grid@data <- bind_cols(eu_10grid@data, number_of_pts_square)
+eu_10grid@data
+```
+
+
+and then adding it by `addPolygons`:
+```{r}
+pal <- colorNumeric("viridis", NULL)
+leaflet() %>% 
+  addTiles()  %>% 
+  addPolygons(data = eu_10grid,
+              stroke = FALSE, 
+              fillColor = ~pal(value),
+              fillOpacity = 0.6,
+              smoothFactor = 0.1,
+              label = ~paste0(value)) %>%
+  addLegend(pal = pal, 
+            values = eu_10grid@data$value, 
+            opacity = 1.0)
+```
+For more information on `leaflet` package, the tutorial ![Leaflet for R](https://rstudio.github.io/leaflet/ "Leaflet for R") is stongly suggested.
+
+### Temporal occurrence distribution
+
+Retrieving the yearly occurrence distribution is straightforward:
+```{r}
+counts_per_year <- count(occurrences, year)
+counts_per_year
+```
+
+And plotting by `ggplot2` package as well: 
+```{r}
+gg_year <- ggplot(counts_per_year, aes(y = n, x = year)) +
+   geom_bar(stat="identity", fill = "blue")
+gg_year
+```
+
+For some migratory species, as Vanessa Atalanta, can be interesting to see the monthly occurrence distribution:
+```{r}
+counts_per_month <- count(occurrences, month)
+gg_month <- ggplot(counts_per_month, aes(y = n, x = month)) +
+   geom_bar(stat="identity", fill = "red") +
+   scale_x_continuous(breaks=seq(1,12,1), 
+                      labels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", 
+                                 "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"))
+gg_month
+```
+
+And here below just a nicer version by adding aesthetical parameters and components to the plot:
+```{r}
+gg_month + labs(title="Monthly distribution", subtitle = species) + 
+  theme(plot.title=element_text(size=20, 
+                                    face="bold", 
+                                    color="tomato",
+                                    hjust=0.5,
+                                    lineheight=1.2),
+        plot.subtitle=element_text(size=15, 
+                                    face="bold", 
+                                    color="tomato",
+                                    hjust=0.5,
+                                    lineheight=1.0),
+        axis.title.x=element_text(size = 15),
+        axis.title.y=element_text(size = 15))
+```
+
+## Extra  
+In this chapter we will show some additional features of RGBIF to improve analysis quality and performance.
+
+### Downloading occurrence data: the `occ_download` function
+The function `occ_data` used in the first part of this tutorial is very easy to use due to its on the fly behavior. However, it is not the best one to download big chuncks of occurrence data. Its hard limit of 200000 records can get easily reached if we try to download occurrence records related to:
+* several species,
+* wide geographical areas,
+* wide temporal window,
+* entire dataset(s)
+
+In all these cases we need to use the function `occ_download`, which *spins up* a download request for GBIF occurrence data. The occurrence records are not on the fly available in our R session, but prepared to be downloaded as a zip file via a download link.
+
+Here below an example: we search occurrence data related to two butterflies, *Vanessa atalanta Linnaeus, 1758* and *Phylloscopus collybita (Vieillot, 1817)*, from all Europe and within the time span of the last thirty years:
+```{r}
+species <- c("Vanessa atalanta Linnaeus, 1758", "Phylloscopus collybita (Vieillot, 1817)")
+continent <- "Europe"
+date_today <- as.Date(Sys.Date())
+year_today <- as.numeric(format(date_today, "%Y"))
+year_min <- year_today - 29
+```
+
+The input arguments of `occ_download` are quite the same ones as of `occ_data`, made exception for:
+*`user`: user name within GBIF’s website,
+*`pswd`: user password within GBIF’s website,
+*`e-mail`: e-mail address to recieve download notice e-mail
+
+It is reccomended to save them in `.Renviron/.bash_profile` (or similar) file with the names `GBIF_USER`, `GBIF_PWD`, and `GBIF_EMAIL`: in this way we avoid to type them everytime function `occ_download` is called.
+
+Last, but not least, arguments have to be passed as character (e.g., `continent = Europe`), with a space between key (`continent`), operator (`=`), and value (`Europe`). Comma separated values are turned into a predicate combined with the OR operator (see ![RGBIF documentation](https://cran.r-project.org/web/packages/rgbif/rgbif.pdf "RGBIF") for more information and several examples). This makes the usage of `scientificName` very annoying: the name of the butterflies used in our example, as the majority of scientific names, contain a comma. Species *Vanessa atalanta Linnaeus, 1758* and *Phylloscopus collybita* would be therefore misinterepreted, resulting in empty files. Moreover, citing from the ![GBIF occurrence API](https://www.gbif.org/developer/occurrence "GBIF occurrence API") we can read:
+> Under the hood a call to the species match service is done first to retrieve a taxonKey. Only unique scientific names will return results, homonyms (many monomials) return nothing! Consider to use the taxonKey parameter instead and the species match service directly.
+
+So, as suggested we first get the related key from the GBIF backbone via `name_backbone`:
+```{r}
+taxonKeys <- purrr::map_df(species, ~name_backbone(name = .)) %>% select(usageKey) %>% unlist()
+taxonKeys
+``` 
+The download query is the following:
+```{r}
+occ_download_key <- occ_download(
+                     paste("taxonKey = ", paste(taxonKeys, collapse = ",")),
+                     paste("continent = ", continent),
+                     paste("year >= ", paste(year_min)),
+                     paste("year <= ", paste(year_today)))
+occ_download_key
+```
+As you can see, a call to `occ_download` generates  a `gbif download` object, which is essentially a *download key*. Via such key we can retrieve informations about the status of our request:
+```{r}
+metadata <- occ_download_meta(key = occ_download_key)
+metadata
+```
+
+The download status is stored in `metadata$status` and it can be one of the following: `PREPARING`, `RUNNING`, `FAILED` or `SUCCEDED`. The link to the requested data is stored in `metadata$downloadLink`. If `metadata$status = SUCCEDED` then we can copy-paste the link in a browser or you can download the zip file via `occ_download_get`:
+```{r}
+occ_file <- occ_download_get(occ_download_key, 
+                             path = "../data/output/", overwrite = TRUE)
+```
+and importing it via `occ_download_import`:
+```{r}
+occurrences <- occ_download_import(occ_file)
+head(occurrences)
+```
+
+which returns a `data.frame` object as `occ_data` did. We can therefore apply standard `dplyr` and `tidyr` dataframe manipulation techniques. For example, by `group_by` can we get easily occurrences for each species (grouping by `scientificName` or `taxonKey`) and redo the same analysis as before. 
+
+If we try to count the number of occurrence records per species:
+```{r}
+occurrences %>% group_by(taxonKey, scientificName) %>% count()
+```
+we can notice that all included taxa (in this case subspecies) are returned! And to make a distinction, they get a different `taxonKey` (and `scientificName` obviously). For more about GBIF backbone taxonomic structure and related RGBIF fcuntions, see other tutorial. So, if you want to get rid of subspecies classification, group by `speciesKey`:
+```{r}
+counts_per_month <- occurrences %>% group_by(speciesKey) %>% count(month) %>% filter(!is.na(month))
+counts_per_month
+```
+Notice also that `speciesKey` are, as expected, equal to variable `taxonKeys` which was used as input argument in `occ_download`.
+
+We can then compare monthly occurrence distribution via histogram:
+```{r}
+ggplot(data = counts_per_month, aes(x = month, y = n, fill = factor(speciesKey))) +
+  geom_bar(position = "dodge", stat="identity") +
+  labs(title = "Monthly occurrence distribution", 
+       x = "month", 
+       y = "n. of occurrences") +
+  scale_x_continuous(breaks=seq(1,12,1), 
+                     labels=c("Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                              "Jul", "Aug", "Sept", "Oct", "Nov",
+                              "Dec")) +
+  scale_fill_discrete(name = "SPECIES",
+                      labels = species) + 
+  theme(legend.title = element_text(colour="blue", size=12, 
+                                      face="bold"), 
+        legend.background = element_rect(fill="lightgrey", 
+                                  size=0.5, linetype="solid"))
+```
+
+Or distribution per country:
+```{r}
+# create a df with speciesKey and scientificName
+groups = occurrences %>% filter(speciesKey == taxonKey) %>% select(scientificName, speciesKey) %>% unique()
+
+# create a df speciesKey, countryCode and number of occurrence per country
+counts_per_country <- occurrences %>% 
+  group_by(speciesKey) %>% 
+  count(countryCode) %>% filter(!is.na(countryCode))
+
+counts_per_country <- left_join(counts_per_country, groups, by = "speciesKey")
+counts_per_country
+```
+
+```{r}
+ggplot(data = counts_per_country, 
+       aes(x = countryCode, y = n, fill = factor(speciesKey))) +
+  geom_bar(position = "dodge", stat="identity") +
+  
+  labs(title = "Occurrence distribution per country", 
+       x = "country", 
+       y = "n. of occurrences") + 
+  scale_y_continuous(trans='log10', labels = scales::comma) +
+  theme(title = element_text(face = "bold"), 
+        axis.title = element_text(face = "bold"),
+        axis.text.x = element_text(size = 8, color = "blue")) + 
+  scale_fill_discrete(name = "SPECIES",
+                      labels = counts_per_country$scientificName %>% unique()) + 
+  theme(legend.title = element_text(colour="blue", size=12, 
+                                      face="bold"), 
+        legend.background = element_rect(fill="lightgrey", 
+                                  size=0.5, linetype="solid"))
+```
+
+The occurrence geographical distribution can be extended to multiple species and shown via `leaflet` as multiple layers. First, we drop all occurrence records with no geographical coordinates:
+```{r}
+occurrences_coordinates <- occurrences %>% 
+  drop_na(decimalLongitude, decimalLatitude) %>% 
+  count(decimalLongitude, decimalLatitude, speciesKey)
+head(occurrences_coordinates)
+```
+
+Then, we add circle markers with different colors for different species. Notice the loop implementation to avoid writing multiple `addCircleMarkers(...)`:
+```{r}
+#color palette (two colors)
+pal <- colorFactor(c("navy", "red"), domain = groups$speciesKey)
+
+occ_map_EU <- leaflet() %>% addTiles()
+# Overlay groups:
+for (i in 1:nrow(groups)) {
+  d <- occurrences_coordinates %>% filter(speciesKey == groups$speciesKey[i])
+  occ_map_EU <- occ_map_EU %>% addCircleMarkers(data = d,
+             lng = ~decimalLongitude, lat = ~decimalLatitude,
+             radius = ~0.5+log(n+1), # easy function to avoid too small or too big circles
+             color = pal(groups$speciesKey[i]),
+             stroke = FALSE, 
+             group = as.character(groups$scientificName[i]),
+             fillOpacity = 0.5)
+}
+```
+
+Adding legend and layer control:
+```{r}
+n_occurrences_coordinates <- occurrences_coordinates %>% group_by(speciesKey) %>% summarise(n_occurrence = sum(n))
+occ_map_EU %>% 
+  addLegend(position = "bottomright",
+            title = "Total number of occurrences",
+            labels = groups$scientificName,
+            color = pal(groups$speciesKey),
+            opacity = 0.8) %>%
+  addLayersControl(overlayGroups = as.character(groups$scientificName),
+                   options = layersControlOptions(collapsed = FALSE))
+```
+
