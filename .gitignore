@@ -37,3 +37,4 @@ vignettes/*.pdf
 # custom ignores for project
 creds.py
 __pycache__
+*/photos/
