@@ -15,6 +15,7 @@
 import io
 import os
 import sys
+import time
 import logging
 import threading
 from datetime import datetime
@@ -206,13 +207,23 @@ def main():
     net = cv2.dnn.readNetFromCaffe("./model/MobileNetSSD_deploy.prototxt.txt",
                                    "./model/MobileNetSSD_deploy.caffemodel")
 
-    with picamera.PiCamera() as camera:
-        camera.resolution = (1024, 768) # (1920, 1440) # 1296x972
-        camera.exposure_mode = "sports"
-        camera.framerate = framerate
 
+    with picamera.PiCamera(resolution='VGA') as camera:
+        camera.start_preview()
+        time.sleep(2)
         output = ProcessOutput(net, save_location, nthreads=3)
-        camera.capture_sequence(output, use_video_port=False, burst=True)
+        camera.start_recording(output, format='mjpeg')
+        while not output.done:
+            camera.wait_recording(1)
+        camera.stop_recording()
+
+    #with picamera.PiCamera() as camera:
+    #    camera.resolution = (1024, 768) # (1920, 1440) # 1296x972
+    #    camera.exposure_mode = "sports"
+    #    camera.framerate = framerate
+    #
+    #    output = ProcessOutput(net, save_location, nthreads=3)
+    #    camera.capture_sequence(output, use_video_port=False, burst=True)
 
 if __name__ == "__main__":
     sys.exit(main())
