@@ -12,12 +12,10 @@
 #
 #==============================================================================
 
-import io
 import os
 import sys
 import time
 import logging
-import threading
 from datetime import datetime
 
 import cv2
@@ -81,149 +79,92 @@ def apply_recognition(image, neural_net_model):
 
     return image, image_info
 
-
-class ImageProcessor(threading.Thread):
-    """Process the incoming camera shots
-    """
-
-    def __init__(self, owner, net_model, storage_path="."):
-        super(ImageProcessor, self).__init__()
-        self.stream = io.BytesIO()
-        self.event = threading.Event()
-        self.terminated = False
-        self.owner = owner
-        self.start()
-        self.model = net_model
-        self.storage_folder = storage_path
-        self.identifier = 0
-
-    def run(self):
-        # This method runs in a separate thread
-        while not self.terminated:
-            # Wait for an image to be written to the stream
-            if self.event.wait(1):
-                self.identifier += 1
-                try:
-                    self.stream.seek(0)
-                    # Read the image
-                    image = np.asarray(Image.open(self.stream))
-                    logging.info('Image received...')
-
-                    classified_image, image_metadata = apply_recognition(image, self.model)
-                    time_now = datetime.now()
-                    get_date = time_now.strftime('%Y%m%d')
-                    get_time = time_now.strftime('%H%M%S')
-                    file_name = '_'.join([get_date, get_time,
-                                          str(self.identifier), '.jpg'])
-                    cv2.imwrite(os.path.join(self.storage_folder, file_name),
-                                classified_image)
-                    logging.info('Image successfully %(show_photo_name)s handled',
-                                 {'show_photo_name': file_name})
-                    logging.info(image_metadata)
-
-                    # Set done to True if you want the script to terminate
-                    # at some point
-                    self.owner.done = True
-                finally:
-                    # Reset the stream and event
-                    self.stream.seek(0)
-                    self.stream.truncate()
-                    self.event.clear()
-                    # Return ourselves to the available pool
-                    with self.owner.lock:
-                        self.owner.pool.append(self)
-
-
-class ProcessOutput(object):
+def camera_sequence(framerate=3, nframes=3, resolution=(1024, 768)):
     """[summary]
+    
+    Arguments:
+        framerate {[type]} -- [description]
+        768 {[type]} -- [description]
+    
+    Keyword Arguments:
+        nframes {[type]} -- [description] (default: {3})
+    
+    Returns:
+        [type] -- [description]
     """
+    with picamera.PiCamera() as camera:
+        camera.resolution = resolution
+        camera.framerate = framerate
+        camera.exposure_mode = "sports"
 
-    def __init__(self, net_model, storage_path, nthreads=4):
-        self.done = False
-        # Construct a pool of 4 image processors along with a lock
-        # to control access between threads
-        self.lock = threading.Lock()
-        self.pool = [ImageProcessor(self, net_model, storage_path) for i in range(nthreads)]
-        self.processor = None
-
-    def write(self, buf):
-        """[summary]
-
-        Arguments:
-            buf {[type]} -- [description]
-        """
-        if buf.startswith(b'\xff\xd8'):
-            # New frame; set the current processor going and grab
-            # a spare one
-            if self.processor:
-                self.processor.event.set()
-            with self.lock:
-                if self.pool:
-                    self.processor = self.pool.pop()
-                else:
-                    # No processor's available, we'll have to skip
-                    # this frame; you may want to print a warning
-                    # here to see whether you hit this case
-                    self.processor = None
-                    print("Skipping single frame handling")
-        if self.processor:
-            self.processor.stream.write(buf)
-
-    def flush(self):
-        """properly shut down the pool
-        When told to flush (this indicates end of recording), shut down in an
-        orderly fashion. First, add the current processor back to the pool.
-        """
-        if self.processor:
-            with self.lock:
-                self.pool.append(self.processor)
-                self.processor = None
-        # Now, empty the pool, joining each thread as we go
-        while True:
-            with self.lock:
-                try:
-                    proc = self.pool.pop()
-                except IndexError:
-                    pass # pool is empty
-            proc.terminated = True
-            proc.join()
+        output = [np.empty((768 * 1024 * 3,), dtype=np.uint8) for i in range(nframes)]
+        camera.capture_sequence(output, format='bgr',
+                                use_video_port=False, burst=True)
+        return output
 
 
 def main():
-    
-    sensorPin = 13
-    frames = 3
-    framerate = 3 #fps
+    print("running...")
 
+    sensor_pin = 13
+    frames = 3
+    framerate = 3 
     save_location = "../photos/"
 
     # Setting the GPIO (General Purpose Input Output) pins up
     # so we can detect if they are HIGH or LOW (on or off)
     GPIO.setmode(GPIO.BOARD)
-    GPIO.setup(sensorPin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+    GPIO.setup(sensor_pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
     # load our serialized model from disk
     print("[INFO] loading model...")
     net = cv2.dnn.readNetFromCaffe("./model/MobileNetSSD_deploy.prototxt.txt",
                                    "./model/MobileNetSSD_deploy.caffemodel")
 
+    # Defining our default states so we can detect a change
+    prev_state = False
+    curr_state = False
 
-    with picamera.PiCamera(resolution='VGA') as camera:
-        camera.start_preview()
-        time.sleep(2)
-        output = ProcessOutput(net, save_location, nthreads=3)
-        camera.start_recording(output, format='mjpeg')
-        while not output.done:
-            camera.wait_recording(1)
-        camera.stop_recording()
+    # Starting a loop
+    print("start loop")
+    while True:
+        time.sleep(0.1)
+        prev_state = currState
 
-    #with picamera.PiCamera() as camera:
-    #    camera.resolution = (1024, 768) # (1920, 1440) # 1296x972
-    #    camera.exposure_mode = "sports"
-    #    camera.framerate = framerate
-    #
-    #    output = ProcessOutput(net, save_location, nthreads=3)
-    #    camera.capture_sequence(output, use_video_port=False, burst=True)
+        # Map the state of the camera to our input pins
+        # (jumper cables connected to your PIR)
+        curr_state = GPIO.input(sensor_pin)
+
+        # Checking that our state has changed
+        if curr_state != prev_state:
+            new_state = "HIGH" if curr_state else "LOW"
+            print("GPIO pin %s is %s" % (sensor_pin, new_state))
+
+            if curr_state:
+                # Recording that a PIR trigger was detected
+                logging.info('PIR trigger detected')
+
+                # file names based on current datetime
+                i = datetime.now()
+                get_date = i.strftime('%Y-%m-%d')
+                get_time = i.strftime('%H:%M:%S')
+
+                images = camera_sequence()
+                for j, image in enumerate(images):
+                    annotated_image, image_info = apply_recognition(image, neural_net_model=net)
+                    filename = get_date + '_' +  get_time + '_' + str(j) + '.jpg'
+                    cv2.imwrite(os.path.join(save_location, filename), 
+                                             annotated_image)
+                    logging.info(image_info)
+                
+                # Log that sequence was taken successfully and state the file name so we know which one
+                logging.info('Photo sequence handled successfully %(show_photo_name)s', { 'show_photo_name': filename })
+
+            else:
+
+               # print "Waiting for a new PIR trigger to continue"
+               logging.info('Waiting for a new PIR trigger to continue')
+
 
 if __name__ == "__main__":
     sys.exit(main())
