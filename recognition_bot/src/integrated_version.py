@@ -48,6 +48,7 @@ def apply_recognition(image, neural_net_model):
 
     # run open CV model
     (h, w) = image.shape[:2]
+    print(h, w)
     blob = cv2.dnn.blobFromImage(cv2.resize(image, (300, 300)), 0.007843,
                                  (300, 300), 127.5)
     neural_net_model.setInput(blob)
@@ -79,7 +80,7 @@ def apply_recognition(image, neural_net_model):
 
     return image, image_info
 
-def camera_sequence(framerate=3, nframes=3, resolution=(1024, 768)):
+def camera_sequence(framerate=3, nframes=2, resolution=(1024, 768)):
     """[summary]
     
     Arguments:
@@ -92,12 +93,13 @@ def camera_sequence(framerate=3, nframes=3, resolution=(1024, 768)):
     Returns:
         [type] -- [description]
     """
+    width, height = resolution
     with picamera.PiCamera() as camera:
         camera.resolution = resolution
         camera.framerate = framerate
         camera.exposure_mode = "sports"
 
-        output = [np.empty((768 * 1024 * 3,), dtype=np.uint8) for i in range(nframes)]
+        output = [np.empty((height * width * 3,), dtype=np.uint8) for i in range(nframes)]
         camera.capture_sequence(output, format='bgr',
                                 use_video_port=False, burst=True)
         return output
@@ -110,6 +112,7 @@ def main():
     frames = 3
     framerate = 3 
     save_location = "../photos/"
+    width, height = (1024, 768)
 
     # Setting the GPIO (General Purpose Input Output) pins up
     # so we can detect if they are HIGH or LOW (on or off)
@@ -129,7 +132,7 @@ def main():
     print("start loop")
     while True:
         time.sleep(0.1)
-        prev_state = currState
+        prev_state = curr_state
 
         # Map the state of the camera to our input pins
         # (jumper cables connected to your PIR)
@@ -149,8 +152,11 @@ def main():
                 get_date = i.strftime('%Y-%m-%d')
                 get_time = i.strftime('%H:%M:%S')
 
-                images = camera_sequence()
+                images = camera_sequence(framerate=framerate, nframes=frames, 
+                                         resolution= (width, height))
                 for j, image in enumerate(images):
+                    print(image.shape)
+                    image = image.reshape((height, width, 3))
                     annotated_image, image_info = apply_recognition(image, neural_net_model=net)
                     filename = get_date + '_' +  get_time + '_' + str(j) + '.jpg'
                     cv2.imwrite(os.path.join(save_location, filename), 
