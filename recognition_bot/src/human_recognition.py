@@ -24,6 +24,8 @@ CLASSES = ["background", "aeroplane", "bicycle", "bird", "boat",
 COLORS = np.random.uniform(0, 255, size=(len(CLASSES), 3))
 CONFIDENCE = 0.3
 
+frames = 3
+
 def load_last_sequence_ftp(url, usr, pwd, subfolder, remove_on_pi=False):
     """Load the latest available sequence from FTP
     Arguments:
@@ -33,7 +35,7 @@ def load_last_sequence_ftp(url, usr, pwd, subfolder, remove_on_pi=False):
     """
     local_prefix = "../photos"
     ftp_con = FTPConnector(url, usr, pwd, subfolder)
-    last_sequence_names = list(ftp_con.list_files())[-6:]
+    last_sequence_names = list(ftp_con.list_files())[-frames:]
     for filename in last_sequence_names:
         if not os.path.exists(os.path.join(local_prefix, filename)):
             ftp_con.download_file(filename, local_path_prefix=local_prefix)
@@ -109,7 +111,7 @@ def main():
     print("[INFO] downloading files...")
     photo_folder = "./Documents/lifewatch-meeting-2018/recognition_bot/photos"
     filenames = load_last_sequence_ftp(RASPIP, RASPUSR, RASPPWD, photo_folder,
-                                       remove_on_pi=False) # Put True to keep Pi clean
+                                       remove_on_pi=True) # Put True to keep Pi clean
     print(filenames)
     print(os.path.join("../photos", filenames[0]))
     print("[INFO] applying model...")

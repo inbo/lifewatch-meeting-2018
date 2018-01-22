@@ -12,11 +12,13 @@
 #
 #==============================================================================
 
+import io
 import os
 import sys
 import time
 import logging
 from datetime import datetime
+import multiprocessing as mp
 
 import cv2
 import picamera
@@ -103,7 +105,6 @@ def camera_sequence(framerate=3, nframes=2, resolution=(1024, 768)):
         camera.capture_sequence(output, format='bgr',
                                 use_video_port=False, burst=True)
         return output
-
 
 def main():
     print("running...")
