@@ -25,10 +25,12 @@ CONFIDENCE = 0.3
 
 def run_recognition(filename, image, neural_net_model, output_dir):
     """Apply the opencv neural net to the image
-    
+
     Arguments:
         filename {str} -- which photo?
-        model {net} -- OpenCV net
+        image {cv2 image}
+        neural_net_model {net} -- OpenCV net
+        output_dir -- where to write the output result?
     """
 
     # run open CV model
@@ -83,20 +85,21 @@ def main():
     # load our serialized model from disk
     print("[INFO] loading model...")
     net = cv2.dnn.readNetFromCaffe("./model/MobileNetSSD_deploy.prototxt.txt", 
-                                "./model/MobileNetSSD_deploy.caffemodel")
+                                   "./model/MobileNetSSD_deploy.caffemodel")
 
-    print("[INFO] downloading files...")
+    print("[INFO] loading files...")
     photo_folder = "../photos"
     output_dir = "../annotated_photos"
-    
+
     image_data = []    
     while True:
         files = sorted(os.listdir(photo_folder))
         if len(files) > 0:
+            time.sleep(0.1)
             oldest_file = files[0]
             # apply model
             print("Handling file", oldest_file)
-            try:
+            try: # hacky method to handle zero-size buffered images
                 image = cv2.imread(os.path.join(photo_folder, oldest_file))
                 image.shape
             except:
@@ -107,7 +110,7 @@ def main():
             image_data.append(detections)
             # delete file
             os.remove(os.path.join(photo_folder, oldest_file))
-            
+
            # create the output
             data = {}
             data["sequence_images"] = image_data
