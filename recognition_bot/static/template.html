@@ -2,20 +2,23 @@
 <meta charset="utf-8">
 <head>
     <style>
-    div.gallery {
-        margin: 5px;
-        border: 1px solid #ccc;
-        float: left;
-        width: 400px;
+    a {
+            color: #FFF;
     }
-    
-    div.gallery:hover {
-        border: 1px solid #777;
+    a:hover {
+            color: yellow;
+            text-decoration: underline;
     }
-    
-    div.gallery img {
-        width: 100%;
-        height: auto;
+    .thumbnails img {
+            height: 80px;
+            border: 4px solid #555;
+            padding: 1px;
+            margin: 0 10px 10px 0;
+    }
+
+    .thumbnails img:hover {
+            border: 4px solid #00ccff;
+            cursor:pointer;
     }
     
     div.desc {
@@ -24,27 +27,35 @@
     }
     </style>
     <meta http-equiv="refresh" content="10">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     </head>
-<title>Recognition bot application</title>
-<body>
-  <header>
-    <h1>Trick the recognition bot!</h1>
-  </header>
 
-  <div class="page">
-    {% for image in sequence_images %}
-    <div class="gallery">
-        <a target="_blank" href="{{ image.path }}"></a>
-          <img src="{{ image.path }}" alt="" width="400">
-        </a>
-          <div class="desc">
-              {% for classification in image.classifications if "person" in classification %}    
-              {{ classification }}<br>
-              {% else %}
-              No person found!<br>
-              {% endfor %}
-          </div>
+<body>
+  <div class="container">
+    <h1>Trick the recognition bot!</h1>
+    <div class="row">
+        {% for image in sequence_images %}
+        <div class="col-md-3">
+            <div class="thumbnail">
+                <a href="{{ image.path }}" target="_blank">
+                <img src="{{ image.path }}" alt="" style="width:100%">
+                <div class="caption">
+                    <div class="desc">
+                        {% for classification in image.classifications if "person" in classification %}    
+                        {{ classification }}<br>
+                        {% else %}
+                        No person found!<br>
+                        {% endfor %}
+                    </div>
+                </div>
+                </a>
+            </div>
+        </div>
+        {% endfor %}
     </div>
-    {% endfor %}
   </div>
 </body>
