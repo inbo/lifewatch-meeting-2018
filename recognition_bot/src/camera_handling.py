@@ -26,7 +26,7 @@ logging.info('Lifewatch demo setup started up successfully')
 
 # Assigning a variable to the pins that we have connected the PIR to
 sensorPin = 13
-frames = 6
+frames = 3
 framerate = 3 #fps
 
 # Setting the GPIO (General Purpose Input Output) pins up
@@ -38,14 +38,14 @@ GPIO.setup(sensorPin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 saveLocation = "../photos/"
 
 def main():
-    print "running..."
+    print("running...")
 
     # Defining our default states so we can detect a change
     prevState = False
     currState = False
 
     # Starting a loop
-    print "start loop"
+    print("start loop")
     while True:
         time.sleep(0.1)
         prevState = currState
@@ -58,7 +58,7 @@ def main():
         if currState != prevState:
             # About to check if our new state is HIGH or LOW
             newState = "HIGH" if currState else "LOW"
-            print "GPIO pin %s is %s" % (sensorPin, newState)
+            print("GPIO pin %s is %s" % (sensorPin, newState))
             # print "Battery level detected via pin %s is %s" % (lowbattPin, newBattState)
 
             if currState:  # Our state has changed, so that must be a trigger from the PIR
@@ -78,9 +78,9 @@ def main():
                 
                 logging.info('About to take photo sequence and save to the drive')
                 with picamera.PiCamera() as camera:
-                    camera.resolution = (1024, 768) # (1920, 1440) # 1296x972
-                    camera.exposure_mode = "sports"
+                    camera.resolution = (1024, 768)
                     camera.framerate = framerate
+                    camera.exposure_mode = "sports"
                     camera.capture_sequence([photo_location % i for i in range(frames)],
                                             use_video_port=False, burst=True)
 
