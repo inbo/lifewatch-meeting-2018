@@ -8,36 +8,34 @@
 # Useage: camera_handling.py -o <outputlocation>
 # ==============================================================================
 
-import RPi.GPIO as GPIO
-from gpiozero import MotionSensor
+import os
+import sys
 import time
+import logging
 from subprocess import call
 from datetime import datetime
-import logging
-import sys
-import os
+
 import picamera
+import RPi.GPIO as GPIO
+from gpiozero import MotionSensor
 
 # Logging the activity to a log file.
-
 logging.basicConfig(format='%(asctime)s %(message)s',
                     filename='lifewatch_day_camera_log',
                     level=logging.DEBUG)
 logging.info('Lifewatch demo setup started up successfully')
 
 # Assigning a variable to the pins that we have connected the PIR to
-sensorPin = 13
+sensorPin = 27 # using Broadcom (BCM) pin numbering
 frames = 2
 framerate = 5 #fps
 
 # Setting the GPIO (General Purpose Input Output) pins up
 # so we can detect if they are HIGH or LOW (on or off)
-#GPIO.setmode(GPIO.BOARD)
-#GPIO.setup(sensorPin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-pir = MotionSensor(27)
+pir = MotionSensor(sensorPin)
 
-# Set default save location
-saveLocation = "../photos/"
+# Set default photo location
+save_location = "../photos/"
 
 def main():
 
@@ -46,15 +44,11 @@ def main():
     while True:
         time.sleep(0.1)
 
-        # Map the state of the camera to our input pins
-        # (jumper cables connected to your PIR)
-        #motion_state = GPIO.input(sensorPin)
-
         # Checking that our state has changed
         #if pir.when_motion:
         print("GPIO pin %s is low" % (sensorPin))
-        pir.wait_for_motion()       
-        
+        pir.wait_for_motion()
+
         while pir.motion_detected:
             print("GPIO pin %s is %s, high" % (sensorPin, 1))
             i = datetime.now() # Get the time now
@@ -68,7 +62,7 @@ def main():
             # Assigning a variable so we can create a photo JPG file that
             # contains the date and time as its name
             photo = get_date + '_' +  get_time + '_%01d.jpg'
-            photo_location =  os.path.join(saveLocation, photo)
+            photo_location =  os.path.join(save_location, photo)
             
             logging.info('About to take photo sequence and save to the drive')
             with picamera.PiCamera() as camera:
