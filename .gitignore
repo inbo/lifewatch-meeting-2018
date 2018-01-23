@@ -38,3 +38,7 @@ vignettes/*.pdf
 creds.py
 __pycache__
 */photos/
+*/annotated_photos/
+
+# Python
+.ipynb_checkpoints
