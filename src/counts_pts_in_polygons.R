@@ -9,6 +9,7 @@
 #' @param lon_col name of the column containing longitude
 #' @return a SpatialPolygonDataframe with @data df containing point counts
 #' @importFrom purrr map
+#' @importFrom stringr str_locate
 #' @importFrom dplyr bind_cols select
 #' @importFrom assertthat assert_that
 #' @importFrom sp SpatialPointsDataFrame over proj4string spTransform
