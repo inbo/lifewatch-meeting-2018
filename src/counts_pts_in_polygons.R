@@ -11,7 +11,7 @@
 #' @importFrom purrr map
 #' @importFrom dplyr bind_cols select
 #' @importFrom assertthat assert_that
-#' @importFrom sp SpatialPointsDataFrame, over, proj4string, spTransform
+#' @importFrom sp SpatialPointsDataFrame over proj4string spTransform
 counts_pts_in_polygons <- function(df, polygons_df,
                                    lat_col = "decimalLatitude",
                                    lon_col = "decimalLongitude",
