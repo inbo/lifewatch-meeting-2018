@@ -45,11 +45,11 @@
                 <img src="{{ image.path }}" alt="" style="width:100%">
                 <div class="caption">
                     <div class="desc">
-                        {% for classification in image.classifications if "person" in classification %}    
-                        {{ classification }}<br>
+                        {% if image.humans %}    
+                        Person found!<br>
                         {% else %}
-                        No person found!<br>
-                        {% endfor %}
+                        No person found...<br>
+                        {% endif %}
                     </div>
                 </div>
                 </a>
