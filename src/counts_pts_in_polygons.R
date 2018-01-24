@@ -64,7 +64,7 @@ counts_pts_in_polygons <- function(df, polygons_df,
   pts_square <- over(polygons_df, pts_df, returnList = TRUE)
 
   # count how many points are in each polygon
-  n_of_pts_square <- purrr:::map(pts_square, ~ nrow(.))
+  n_of_pts_square <- purrr::map(pts_square, ~ nrow(.))
   n_of_pts_square <- data.frame(id = names(n_of_pts_square),
                                 value = unlist(n_of_pts_square))
 
