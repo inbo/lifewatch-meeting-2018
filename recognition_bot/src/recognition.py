@@ -7,12 +7,11 @@
 
 import os
 import sys
+import time
 
 import cv2
 import numpy as np
 
-from creds import RASPIP, RASPUSR, RASPPWD
-from ftp_connector import FTPConnector
 from jinja2 import FileSystemLoader, Environment
 
 # initialize the list of class labels MobileNet SSD was trained to
@@ -24,35 +23,17 @@ CLASSES = ["background", "aeroplane", "bicycle", "bird", "boat",
 COLORS = np.random.uniform(0, 255, size=(len(CLASSES), 3))
 CONFIDENCE = 0.3
 
-def load_last_sequence_ftp(url, usr, pwd, subfolder, remove_on_pi=False):
-    """Load the latest available sequence from FTP
-    Arguments:
-        url {str} -- ip adress of the raspberry
-        usr {str} -- username
-        pwd {str} -- password
-    """
-    local_prefix = "../photos"
-    ftp_con = FTPConnector(url, usr, pwd, subfolder)
-    last_sequence_names = list(ftp_con.list_files())[-6:]
-    for filename in last_sequence_names:
-        if not os.path.exists(os.path.join(local_prefix, filename)):
-            ftp_con.download_file(filename, local_path_prefix=local_prefix)
-    # remove the Files
-    if remove_on_pi:
-        for filename in last_sequence_names:
-            ftp_con.delete_file(filename)
-    return last_sequence_names
-
-def run_recognition(filename, neural_net_model):
+def run_recognition(filename, image, neural_net_model, output_dir):
     """Apply the opencv neural net to the image
-    
+
     Arguments:
         filename {str} -- which photo?
-        model {net} -- OpenCV net
+        image {cv2 image}
+        neural_net_model {net} -- OpenCV net
+        output_dir -- where to write the output result?
     """
 
     # run open CV model
-    image = cv2.imread(filename)
     (h, w) = image.shape[:2]
     blob = cv2.dnn.blobFromImage(cv2.resize(image, (300, 300)), 0.007843,
                                     (300, 300), 127.5)
@@ -80,9 +61,9 @@ def run_recognition(filename, neural_net_model):
                 y = startY - 15 if startY - 15 > 15 else startY + 15
                 cv2.putText(image, label, (startX, y),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, COLORS[idx], 2)
-    cv2.imwrite(filename, image)
+    cv2.imwrite(os.path.join(output_dir, os.path.basename(filename)), image)
 
-    image_info = {"path" :filename,
+    image_info = {"path" : os.path.join(output_dir, os.path.basename(filename)),
                   "classifications" : detected_objects}
 
     return image_info
@@ -104,26 +85,40 @@ def main():
     # load our serialized model from disk
     print("[INFO] loading model...")
     net = cv2.dnn.readNetFromCaffe("./model/MobileNetSSD_deploy.prototxt.txt", 
-                                "./model/MobileNetSSD_deploy.caffemodel")
+                                   "./model/MobileNetSSD_deploy.caffemodel")
 
-    print("[INFO] downloading files...")
-    photo_folder = "./Documents/lifewatch-meeting-2018/recognition_bot/photos"
-    filenames = load_last_sequence_ftp(RASPIP, RASPUSR, RASPPWD, photo_folder,
-                                       remove_on_pi=False) # Put True to keep Pi clean
-    print(filenames)
-    print(os.path.join("../photos", filenames[0]))
-    print("[INFO] applying model...")
-    image_data = []
-    for filename in filenames:
-        detections = run_recognition(os.path.join("../photos", filename),
-                                     neural_net_model=net)
-        print(detections)
-        image_data.append(detections)
-    
-    data = {}
-    data["sequence_images"] = image_data
-    print(data)
-    create_webpage(data)
+    print("[INFO] loading files...")
+    photo_folder = "../photos"
+    output_dir = "../annotated_photos"
+
+    image_data = []    
+    while True:
+        files = sorted(os.listdir(photo_folder))
+        if len(files) > 0:
+            time.sleep(0.1)
+            oldest_file = files[0]
+            # apply model
+            print("Handling file", oldest_file)
+            try: # hacky method to handle zero-size buffered images
+                image = cv2.imread(os.path.join(photo_folder, oldest_file))
+                image.shape
+            except:
+                continue
+            detections = run_recognition(os.path.join(photo_folder, oldest_file), image,
+                                         neural_net_model=net, output_dir=output_dir)
+            print(detections)
+            image_data.append(detections)
+            # delete file
+            os.remove(os.path.join(photo_folder, oldest_file))
+
+           # create the output
+            data = {}
+            data["sequence_images"] = image_data
+            print(data)
+            create_webpage(data)
+        else:
+            time.sleep(0.5)
+            print("waiting for files")
 
 if __name__ == "__main__":
     sys.exit(main())

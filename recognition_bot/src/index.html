@@ -2,20 +2,23 @@
 <meta charset="utf-8">
 <head>
     <style>
-    div.gallery {
-        margin: 5px;
-        border: 1px solid #ccc;
-        float: left;
-        width: 400px;
+    a {
+            color: #FFF;
     }
-    
-    div.gallery:hover {
-        border: 1px solid #777;
+    a:hover {
+            color: yellow;
+            text-decoration: underline;
     }
-    
-    div.gallery img {
-        width: 100%;
-        height: auto;
+    .thumbnails img {
+            height: 80px;
+            border: 4px solid #555;
+            padding: 1px;
+            margin: 0 10px 10px 0;
+    }
+
+    .thumbnails img:hover {
+            border: 4px solid #00ccff;
+            cursor:pointer;
     }
     
     div.desc {
@@ -23,80 +26,349 @@
         text-align: center;
     }
     </style>
+    <meta http-equiv="refresh" content="10">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     </head>
-<title>Recognition bot application</title>
-<body>
-  <header>
-    <h1>Trick the recognition bot!</h1>
-  </header>
 
-  <div class="page">
-    
-    <div class="gallery">
-        <a target="_blank" href="../photos/2018-01-16_13:16:51_0.jpg"></a>
-          <img src="../photos/2018-01-16_13:16:51_0.jpg" alt="" width="400">
-        </a>
-          <div class="desc">
-                  
-              person: 96.09%<br>
-              
-          </div>
+<body>
+  <div class="container">
+    <h1>Trick the recognition bot!</h1>
+    <div class="row">
+        
+        <div class="col-md-3">
+            <div class="thumbnail">
+                <a href="../annotated_photos/2018-01-19_21:27:35_2.jpg" target="_blank">
+                <img src="../annotated_photos/2018-01-19_21:27:35_2.jpg" alt="" style="width:100%">
+                <div class="caption">
+                    <div class="desc">
+                        
+                        No person found...<br>
+                        
+                    </div>
+                </div>
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="thumbnail">
+                <a href="../annotated_photos/2018-01-19_21:27:35_3.jpg" target="_blank">
+                <img src="../annotated_photos/2018-01-19_21:27:35_3.jpg" alt="" style="width:100%">
+                <div class="caption">
+                    <div class="desc">
+                        
+                        No person found...<br>
+                        
+                    </div>
+                </div>
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="thumbnail">
+                <a href="../annotated_photos/2018-01-19_21:27:35_4.jpg" target="_blank">
+                <img src="../annotated_photos/2018-01-19_21:27:35_4.jpg" alt="" style="width:100%">
+                <div class="caption">
+                    <div class="desc">
+                        
+                        No person found...<br>
+                        
+                    </div>
+                </div>
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="thumbnail">
+                <a href="../annotated_photos/2018-01-19_21:27:35_5.jpg" target="_blank">
+                <img src="../annotated_photos/2018-01-19_21:27:35_5.jpg" alt="" style="width:100%">
+                <div class="caption">
+                    <div class="desc">
+                        
+                        No person found...<br>
+                        
+                    </div>
+                </div>
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="thumbnail">
+                <a href="../annotated_photos/2018-01-19_21:27:50_0.jpg" target="_blank">
+                <img src="../annotated_photos/2018-01-19_21:27:50_0.jpg" alt="" style="width:100%">
+                <div class="caption">
+                    <div class="desc">
+                            
+                        Person found!<br>
+                        
+                    </div>
+                </div>
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="thumbnail">
+                <a href="../annotated_photos/2018-01-19_21:27:50_1.jpg" target="_blank">
+                <img src="../annotated_photos/2018-01-19_21:27:50_1.jpg" alt="" style="width:100%">
+                <div class="caption">
+                    <div class="desc">
+                        
+                        No person found...<br>
+                        
+                    </div>
+                </div>
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="thumbnail">
+                <a href="../annotated_photos/2018-01-19_21:27:50_2.jpg" target="_blank">
+                <img src="../annotated_photos/2018-01-19_21:27:50_2.jpg" alt="" style="width:100%">
+                <div class="caption">
+                    <div class="desc">
+                            
+                        Person found!<br>
+                        
+                    </div>
+                </div>
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="thumbnail">
+                <a href="../annotated_photos/2018-01-19_21:27:50_3.jpg" target="_blank">
+                <img src="../annotated_photos/2018-01-19_21:27:50_3.jpg" alt="" style="width:100%">
+                <div class="caption">
+                    <div class="desc">
+                            
+                        Person found!<br>
+                        
+                    </div>
+                </div>
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="thumbnail">
+                <a href="../annotated_photos/2018-01-19_21:27:50_4.jpg" target="_blank">
+                <img src="../annotated_photos/2018-01-19_21:27:50_4.jpg" alt="" style="width:100%">
+                <div class="caption">
+                    <div class="desc">
+                            
+                        Person found!<br>
+                        
+                    </div>
+                </div>
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="thumbnail">
+                <a href="../annotated_photos/2018-01-19_21:27:50_5.jpg" target="_blank">
+                <img src="../annotated_photos/2018-01-19_21:27:50_5.jpg" alt="" style="width:100%">
+                <div class="caption">
+                    <div class="desc">
+                            
+                        Person found!<br>
+                        
+                    </div>
+                </div>
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="thumbnail">
+                <a href="../annotated_photos/2018-01-19_21:28:00_0.jpg" target="_blank">
+                <img src="../annotated_photos/2018-01-19_21:28:00_0.jpg" alt="" style="width:100%">
+                <div class="caption">
+                    <div class="desc">
+                            
+                        Person found!<br>
+                        
+                    </div>
+                </div>
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="thumbnail">
+                <a href="../annotated_photos/2018-01-19_21:28:00_1.jpg" target="_blank">
+                <img src="../annotated_photos/2018-01-19_21:28:00_1.jpg" alt="" style="width:100%">
+                <div class="caption">
+                    <div class="desc">
+                            
+                        Person found!<br>
+                        
+                    </div>
+                </div>
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="thumbnail">
+                <a href="../annotated_photos/2018-01-19_21:28:00_2.jpg" target="_blank">
+                <img src="../annotated_photos/2018-01-19_21:28:00_2.jpg" alt="" style="width:100%">
+                <div class="caption">
+                    <div class="desc">
+                            
+                        Person found!<br>
+                        
+                    </div>
+                </div>
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="thumbnail">
+                <a href="../annotated_photos/2018-01-19_21:28:00_3.jpg" target="_blank">
+                <img src="../annotated_photos/2018-01-19_21:28:00_3.jpg" alt="" style="width:100%">
+                <div class="caption">
+                    <div class="desc">
+                            
+                        Person found!<br>
+                        
+                    </div>
+                </div>
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="thumbnail">
+                <a href="../annotated_photos/2018-01-19_21:28:00_4.jpg" target="_blank">
+                <img src="../annotated_photos/2018-01-19_21:28:00_4.jpg" alt="" style="width:100%">
+                <div class="caption">
+                    <div class="desc">
+                            
+                        Person found!<br>
+                        
+                    </div>
+                </div>
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="thumbnail">
+                <a href="../annotated_photos/2018-01-19_21:28:00_5.jpg" target="_blank">
+                <img src="../annotated_photos/2018-01-19_21:28:00_5.jpg" alt="" style="width:100%">
+                <div class="caption">
+                    <div class="desc">
+                            
+                        Person found!<br>
+                        
+                    </div>
+                </div>
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="thumbnail">
+                <a href="../annotated_photos/2018-01-19_21:28:17_0.jpg" target="_blank">
+                <img src="../annotated_photos/2018-01-19_21:28:17_0.jpg" alt="" style="width:100%">
+                <div class="caption">
+                    <div class="desc">
+                            
+                        Person found!<br>
+                        
+                    </div>
+                </div>
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="thumbnail">
+                <a href="../annotated_photos/2018-01-19_21:28:17_1.jpg" target="_blank">
+                <img src="../annotated_photos/2018-01-19_21:28:17_1.jpg" alt="" style="width:100%">
+                <div class="caption">
+                    <div class="desc">
+                            
+                        Person found!<br>
+                        
+                    </div>
+                </div>
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="thumbnail">
+                <a href="../annotated_photos/2018-01-19_21:28:17_2.jpg" target="_blank">
+                <img src="../annotated_photos/2018-01-19_21:28:17_2.jpg" alt="" style="width:100%">
+                <div class="caption">
+                    <div class="desc">
+                            
+                        Person found!<br>
+                        
+                    </div>
+                </div>
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="thumbnail">
+                <a href="../annotated_photos/2018-01-19_21:28:17_3.jpg" target="_blank">
+                <img src="../annotated_photos/2018-01-19_21:28:17_3.jpg" alt="" style="width:100%">
+                <div class="caption">
+                    <div class="desc">
+                        
+                        No person found...<br>
+                        
+                    </div>
+                </div>
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="thumbnail">
+                <a href="../annotated_photos/2018-01-19_21:28:17_4.jpg" target="_blank">
+                <img src="../annotated_photos/2018-01-19_21:28:17_4.jpg" alt="" style="width:100%">
+                <div class="caption">
+                    <div class="desc">
+                        
+                        No person found...<br>
+                        
+                    </div>
+                </div>
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="thumbnail">
+                <a href="../annotated_photos/2018-01-19_21:28:17_5.jpg" target="_blank">
+                <img src="../annotated_photos/2018-01-19_21:28:17_5.jpg" alt="" style="width:100%">
+                <div class="caption">
+                    <div class="desc">
+                            
+                        Person found!<br>
+                        
+                    </div>
+                </div>
+                </a>
+            </div>
+        </div>
+        
     </div>
-    
-    <div class="gallery">
-        <a target="_blank" href="../photos/2018-01-16_13:16:51_1.jpg"></a>
-          <img src="../photos/2018-01-16_13:16:51_1.jpg" alt="" width="400">
-        </a>
-          <div class="desc">
-                  
-              person: 95.86%<br>
-              
-          </div>
-    </div>
-    
-    <div class="gallery">
-        <a target="_blank" href="../photos/2018-01-16_13:16:51_2.jpg"></a>
-          <img src="../photos/2018-01-16_13:16:51_2.jpg" alt="" width="400">
-        </a>
-          <div class="desc">
-                  
-              person: 99.06%<br>
-              
-          </div>
-    </div>
-    
-    <div class="gallery">
-        <a target="_blank" href="../photos/2018-01-16_13:16:51_3.jpg"></a>
-          <img src="../photos/2018-01-16_13:16:51_3.jpg" alt="" width="400">
-        </a>
-          <div class="desc">
-              
-              No person found!<br>
-              
-          </div>
-    </div>
-    
-    <div class="gallery">
-        <a target="_blank" href="../photos/2018-01-16_13:16:51_4.jpg"></a>
-          <img src="../photos/2018-01-16_13:16:51_4.jpg" alt="" width="400">
-        </a>
-          <div class="desc">
-              
-              No person found!<br>
-              
-          </div>
-    </div>
-    
-    <div class="gallery">
-        <a target="_blank" href="../photos/2018-01-16_13:16:51_5.jpg"></a>
-          <img src="../photos/2018-01-16_13:16:51_5.jpg" alt="" width="400">
-        </a>
-          <div class="desc">
-              
-              No person found!<br>
-              
-          </div>
-    </div>
-    
   </div>
 </body>
