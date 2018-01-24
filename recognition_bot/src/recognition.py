@@ -41,6 +41,7 @@ def run_recognition(filename, image, neural_net_model, output_dir):
     detections = neural_net_model.forward()
 
     detected_objects = []
+    detected_humans = False
     for i in np.arange(0, detections.shape[2]):
         # extract the confidence (i.e., probability) associated with
         # the prediction
@@ -61,10 +62,12 @@ def run_recognition(filename, image, neural_net_model, output_dir):
                 y = startY - 15 if startY - 15 > 15 else startY + 15
                 cv2.putText(image, label, (startX, y),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, COLORS[idx], 2)
+                detected_humans = True
     cv2.imwrite(os.path.join(output_dir, os.path.basename(filename)), image)
 
     image_info = {"path" : os.path.join(output_dir, os.path.basename(filename)),
-                  "classifications" : detected_objects}
+                  "classifications" : detected_objects,
+                  "humans": detected_humans}
 
     return image_info
 
