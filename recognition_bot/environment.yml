@@ -1,0 +1,41 @@
+name: cameratrap
+channels:
+- defaults
+dependencies:
+- bzip2=1.0.6=0
+- ca-certificates=2017.7.27.1=0
+- certifi=2017.11.5=py36h3c44272_0
+- ffmpeg=3.2.4=h11ee089_0
+- freetype=2.7=0
+- giflib=5.1.4=h3b1de47_0
+- hdf5=1.8.17=0
+- jasper=1.900.1=hb74bc11_4
+- jinja2=2.8=py36_0
+- jpeg=9b=0
+- libgfortran=3.0.0=0
+- libpng=1.6.28=0
+- libtiff=4.0.6=0
+- libwebp=0.5.2=hcb3eeb6_7
+- markupsafe=0.23=py36_0
+- ncurses=5.9=0
+- numpy=1.14.0=py36h73aad69_0
+- openblas=0.2.19=0
+- opencv=3.3.0=py36hb02bd27_0
+- openssl=1.0.2l=0
+- pillow=3.4.2=py36_0
+- pip=9.0.1=py36_0
+- python=3.6.3=hea4cac4_0
+- readline=6.3=0
+- setuptools=38.4.0=py36hd934b87_0
+- sqlite=3.15.0=0
+- tk=8.6.6=0
+- wheel=0.30.0=py36h76583d5_0
+- x264=20131217=h754e1d8_0
+- xz=5.2.2=0
+- zlib=1.2.11=0
+- pip:
+  - gpiozero==1.4.0
+  - picamera==1.13
+  - rpi.gpio==0.6.3
+prefix: /home/pi/berryconda3/envs/cameratrap
+
