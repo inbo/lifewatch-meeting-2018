@@ -39,6 +39,7 @@ creds.py
 __pycache__
 */photos/
 */annotated_photos/
+recognition_bot/static/movie/
 
 # Python
 .ipynb_checkpoints
