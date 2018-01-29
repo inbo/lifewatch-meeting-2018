@@ -30,4 +30,5 @@ USER ${NB_USER}
 
 #Custom installs for these tutorials
 RUN R --quiet -e "devtools::install_github('inbo/wateRinfo')"
+RUN R --quiet -e "install.packages('rgbif')"
 RUN R --quiet -e "install.packages(c('ggmap', 'leaflet', 'rgdal', 'rgbif'))"
