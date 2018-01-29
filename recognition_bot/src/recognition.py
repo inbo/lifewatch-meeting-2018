@@ -72,7 +72,7 @@ def run_recognition(filename, image, neural_net_model, output_dir):
     return image_info
 
 def create_webpage(data, html_template="../static/template.html",
-                   html_output="./index.html"):
+                   html_output="../index.html"):
     """[summary]
     """
     env = Environment(loader=FileSystemLoader(os.path.dirname(html_template)))

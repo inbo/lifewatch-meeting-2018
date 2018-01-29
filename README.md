@@ -4,15 +4,22 @@ In this repository you can find all material (demo and tutorials) presented by I
 We presented:
 - "Trick the recognition bot" (demo)
 - wateRinfo (tutorial)
-- RGBIF (tutorial/presentation)
-
-## Software
+- RGBIF (tutorial)
 
 ### Demo
-The demo "Trick the recognition bot" is a playful way to test the recognition bot used in cameratrap image processing (CATREIN). You can find related code (Python) [here](https://github.com/inbo/lifewatch-meeting-2018/tree/master/recognition_bot/src) and scheme [here](https://github.com/inbo/lifewatch-meeting-2018/tree/master/recognition_bot/static).
+
+The demo `Trick the recognition bot` is a playful way to test the recognition bot for human detections used in cameratrap image processing (CATREIN). Find out more about the [recognition bot](./recognition_bot/README.md)
 
 ### Tutorials
-The tutorials are in `src` folder. They are [Jupyter Notebooks](http://jupyter.org/): in order to use R in Jupyter notebooks, you need to install IRkernel and make it available to Jupyter by following two easy steps as explained in this [link](https://irkernel.github.io/installation/).
-The authors wrote the tutorials as slideshow presentations, so the [RISE](https://github.com/damianavila/RISE) extension (also known as *live_reveal*) is recommended.
+
+As more and more open data becomes available, it is crucial to provide methods for scientists to efficiently access these data. The `R` language is a popular programming language for researchers working in the field of ecology. Hence, we contribute to and create R packages that enable data access. Two tutorials were presented to introduce two of these packages: `rgbif` (contirbution) and `wateRinfo` (lifewatch develeopment).
+
+The [rgbif package](https://github.com/ropensci/rgbif) gives you access to data from [GBIF](https://www.gbif.org/), were we contribute our biodiversity data. The tutorial illustrates how you can use the package to search and download data from GBIF and how to create and interactive map of the downloaded data.
+
+The [wateRinfo package](https://github.com/inbo/waterinfo) package provides data access to the [waterinfo.be](https://www.waterinfo.be/) data, the data portal provided by the Flemish environmental agency (VMM). Different meteorological, flow and fysico-chemical variables are provided for set of stations. 
+
+Find out more about the [tutorials](./package_tutorials/README.md).
+
+
 
 
