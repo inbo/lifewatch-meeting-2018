@@ -4,15 +4,10 @@
 
 These tutorials can be run online usinng the [binder](https://mybinder.org/) service and relying on the [rocker/binder](https://github.com/rocker-org/binder) R community managed Docker files. 
 
-Check the following links to run the tutorials:
+Click the binder link to run the tutorials (inside the `src` folder):
 
-For the `rgbif` tutorial:
+[![Binder](https://mybinder.org/badge.svg)](https://mybinder.org/v2/gh/inbo/lifewatch-meeting-2018/master?filepath=package_tutorials%2Fsrc)
 
-[![Binder](https://mybinder.org/badge.svg)](https://mybinder.org/v2/gh/inbo/lifewatch-meeting-2018/master?filepath=package_tutorials%2Fsrc%2FwateRinfo.ipynb)
-
-For the `wateRinfo` tutorial:
-
-[![Binder](https://mybinder.org/badge.svg)](https://mybinder.org/v2/gh/inbo/lifewatch-meeting-2018/master?filepath=package_tutorials%2Fsrc%2FtutorialGBIF_occurrence_maps.ipynb)
 
 ## Running the code locally
 
