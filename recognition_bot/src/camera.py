@@ -28,7 +28,7 @@ logging.info('Lifewatch demo setup started up successfully')
 # Assigning a variable to the pins that we have connected the PIR to
 sensorPin = 27 # using Broadcom (BCM) pin numbering
 frames = 2
-framerate = 5 #fps
+framerate = 5 #frames per second
 
 # Setting the GPIO (General Purpose Input Output) pins up
 # so we can detect if they are HIGH or LOW (on or off)
