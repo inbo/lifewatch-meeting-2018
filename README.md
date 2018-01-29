@@ -8,7 +8,9 @@ We presented:
 
 ### Demo
 
-The demo `Trick the recognition bot` is a playful way to test the recognition bot for human detections used in cameratrap image processing (CATREIN). Find out more about the [recognition bot](./recognition_bot/README.md)
+The demo `Trick the recognition bot` is a playful way to test the recognition bot for human detections used in cameratrap image processing (CATREIN). 
+
+Find out more about the [recognition bot](./recognition_bot/README.md)
 
 ### Tutorials
 
