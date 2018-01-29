@@ -1,7 +1,7 @@
 #
 # see https://github.com/binder-examples/dockerfile-r/blob/master/Dockerfile
 
-FROM rocker/tidyverse:3.4.2
+FROM rocker/geospatial:3.3.1
 
 RUN apt-get update && \
     apt-get -y install python3-pip && \
@@ -30,7 +30,5 @@ USER ${NB_USER}
 
 #Custom installs for these tutorials
 RUN R --quiet -e "devtools::install_github('inbo/wateRinfo')"
-RUN apt-get install -y libgeos-dev                 # for rgeos
-RUN apt-get install -y libgdal1-dev libproj-dev    # for rgdal
-RUN R --quiet -e "install.packages(c('rgeos', 'ggmap', 'leaflet', 'rgdal'))"
+RUN R --quiet -e "install.packages(c('ggmap', 'leaflet'))"
 RUN R --quiet -e "install.packages('rgbif')"
