@@ -28,5 +28,6 @@ USER root
 RUN chown -R ${NB_UID}:${NB_UID} ${HOME}
 USER ${NB_USER}
 
-# Run install.r if it exists
-RUN if [ -f install.r ]; then R --quiet -f install.r; fi
+#Custom installs for these tutorials
+RUN R --quiet -e "devtools::install_github('inbo/wateRinfo')"
+RUN R --quiet -e "install.packages(c('ggmap', 'leaflet', 'rgdal', 'rgbif'gs))"
