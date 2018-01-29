@@ -73,7 +73,7 @@ To run the demo yourself, provide the following steps on the Raspberry Pi (eithe
 
 5. To start the processing of the images, open a new terminal window (or stop the camera first, as you like), activate the conda environment (`source activate cameratrap`) and run the `recognition.py` script: `python ./src/recognition.py`
 
-6. Open the `index.html` and check the output of the recognition bot in the browser!
+6. Open the `index.html` and see the output of the recognition bot in the browser!
 
 Was anyone able to trick the bot?
 
