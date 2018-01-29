@@ -8,7 +8,7 @@ Check the following links to run the tutorials:
 
 For the `rgbif` tutorial:
 
-[![Binder](https://mybinder.org/badge.svg)](https://mybinder.org/v2/gh/inbo/lifewatch-meeting-2018/master?filepath=package_tutorials%2Fsrc%2Fwaterinfo.ipynb)
+[![Binder](https://mybinder.org/badge.svg)](https://mybinder.org/v2/gh/inbo/lifewatch-meeting-2018/master?filepath=package_tutorials%2Fsrc%2FwateRinfo.ipynb)
 
 For the `wateRinfo` tutorial:
 
@@ -16,7 +16,7 @@ For the `wateRinfo` tutorial:
 
 ## Running the code locally
 
-These tutorials were setup as [Jupyter notebooks](https://jupyter.org/), providing with addition of an R kernel. in order to use R in Jupyter notebooks on your local machine, you need to install IRkernel and make it available to Jupyter by following steps as explained in this [link](https://irkernel.github.io/installation/).
+These tutorials (inside the `src` directory) were setup as [Jupyter notebooks](https://jupyter.org/), providing with addition of an R kernel. In order to use R in Jupyter notebooks on your local machine, you need to install IRkernel and make it available to Jupyter by following steps as explained in this [link](https://irkernel.github.io/installation/).
 
 An number of R dependencies are required to run the code itself apart from the highlighted packages (`rgbif` and `wateRinfo`). Following pacakages need to be installed as well:
 
