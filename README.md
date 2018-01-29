@@ -8,11 +8,11 @@ We presented:
 
 ### Demo
 
-The demo "Trick the recognition bot" is a playful way to test the recognition bot used in cameratrap image processing (CATREIN). Find out more about the [recognition bot](./recognition_bot/README.md)
+The demo `Trick the recognition bot` is a playful way to test the recognition bot for human detections used in cameratrap image processing (CATREIN). Find out more about the [recognition bot](./recognition_bot/README.md)
 
 ### Tutorials
 
-As more and more open data becomes available, it is crucial to provide methods for scientists to efficiently access these data. The `R` language is a popular programming language for researchers working in the field of ecology. Hence, we contribute to and create R packages that enable data access.
+As more and more open data becomes available, it is crucial to provide methods for scientists to efficiently access these data. The `R` language is a popular programming language for researchers working in the field of ecology. Hence, we contribute to and create R packages that enable data access. Two tutorials were presented to introduce two of these packages: `rgbif` (contirbution) and `wateRinfo` (lifewatch develeopment).
 
 The [rgbif package](https://github.com/ropensci/rgbif) gives you access to data from [GBIF](https://www.gbif.org/), were we contribute our biodiversity data. The tutorial illustrates how you can use the package to search and download data from GBIF and how to create and interactive map of the downloaded data.
 
