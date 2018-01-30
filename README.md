@@ -14,11 +14,11 @@ Find out more about the [recognition bot](./recognition_bot/README.md)
 
 ### Tutorials
 
-As more and more open data becomes available, it is crucial to provide methods for scientists to efficiently access these data. The `R` language is a popular programming language for researchers working in the field of ecology. Hence, we contribute to and create R packages that enable data access. Two tutorials were presented to introduce two of these packages: `rgbif` (contirbution) and `wateRinfo` (lifewatch develeopment).
+As more and more open data becomes available, it is crucial to provide methods for scientists to efficiently access these data. The `R` language is a popular programming language for researchers working in the field of ecology. Hence, we contribute to and create R packages that enable data access. Two tutorials were presented to introduce two of these packages: `rgbif` (contribution) and `wateRinfo` (lifewatch development).
 
-The [rgbif package](https://github.com/ropensci/rgbif) gives you access to data from [GBIF](https://www.gbif.org/), were we contribute our biodiversity data. The tutorial illustrates how you can use the package to search and download data from GBIF and how to create and interactive map of the downloaded data.
+The [rgbif package](https://github.com/ropensci/rgbif) gives you access to data from [GBIF](https://www.gbif.org/), where we contribute our biodiversity data. The tutorial illustrates how you can use the package to search and download data from GBIF and how to create an interactive map of the downloaded data.
 
-The [wateRinfo package](https://github.com/inbo/waterinfo) package provides data access to the [waterinfo.be](https://www.waterinfo.be/) data, the data portal provided by the Flemish environmental agency (VMM). Different meteorological, flow and fysico-chemical variables are provided for set of stations. 
+The [wateRinfo package](https://github.com/inbo/waterinfo) package provides data access to the [waterinfo.be](https://www.waterinfo.be/) data, the data portal provided by the Flemish environmental agency (VMM). Different meteorological, flow and physico-chemical variables are provided for a set of stations. 
 
 Find out more about the [tutorials](./package_tutorials/README.md).
 
