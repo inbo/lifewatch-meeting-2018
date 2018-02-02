@@ -2,7 +2,7 @@
 
 ## Running the code online
 
-These tutorials can be run online usinng the [binder](https://mybinder.org/) service and relying on the [rocker/binder](https://github.com/rocker-org/binder) R community managed Docker files. 
+These tutorials can be run online using the [binder](https://mybinder.org/) service and relying on the [rocker/binder](https://github.com/rocker-org/binder) R community managed Docker files. 
 
 Click the binder link to run the tutorials (inside the `src` folder):
 
