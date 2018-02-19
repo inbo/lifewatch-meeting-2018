@@ -16,7 +16,8 @@ We challenged the audience to trick our recognition bot by passing our DIY camer
 
 ## Hardware
 
-![](./static/setup_1.jpg)
+<img src="./static/setup_1.jpg" width="400">
+<img src="./static/setup_3.jpg" width="400">
 
 From the hardware side, the main components of our setup are:
 
@@ -62,7 +63,7 @@ For the recognition bot demo, a predefined model was used, available [here](http
 
 For the website creation, a  [jinja2](http://jinja.pocoo.org/docs/2.10/) [template](./static/template.html) was set up, which is continuously updated for the incoming annotated images. 
 
-![](./static/setup_2.jpg)
+<img src="./static/setup_2.jpg" width="300">
 
 ## How to run the demo
 
