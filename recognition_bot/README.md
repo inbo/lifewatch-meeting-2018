@@ -16,6 +16,8 @@ We challenged the audience to trick our recognition bot by passing our DIY camer
 
 ## Hardware
 
+![](./static/setup_1.jpg)
+
 From the hardware side, the main components of our setup are:
 
 - Raspberry Pi 3 (with 32 GB SD card)
@@ -59,6 +61,8 @@ This logic was implemented with the help of the [picamera](http://picamera.readt
 For the recognition bot demo, a predefined model was used, available [here](https://github.com/C-Aniruddh/realtime_object_recognition), which can be directly interpreted by the `dnn` module of [openCV](https://opencv.org/). Basically, the bot comes down to a forward application of the model for each of the incoming images. 
 
 For the website creation, a  [jinja2](http://jinja.pocoo.org/docs/2.10/) [template](./static/template.html) was set up, which is continuously updated for the incoming annotated images. 
+
+![](./static/setup_2.jpg)
 
 ## How to run the demo
 
