@@ -16,8 +16,7 @@ We challenged the audience to trick our recognition bot by passing our DIY camer
 
 ## Hardware
 
-<img src="./static/setup_1.jpg" width="400">
-<img src="./static/setup_3.jpg" width="400">
+<img src="./static/setup_1.jpg" width="400"><img src="./static/setup_3.jpg" width="400">
 
 From the hardware side, the main components of our setup are:
 
